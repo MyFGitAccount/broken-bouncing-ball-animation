@@ -4,91 +4,139 @@ const width = 600;
 canvas.height = height;
 canvas.width = width;
 const ctx = canvas.getContext("2d");
-let circlePosX=height/2;
-let circlePosY=width/2;
-let circleVecX=1;
-let circleVecY=0.5;
-let mass=20;
-const massInput=document.getElementById("mass");
-const speedx=document.getElementById("speedx");
-const speedy=document.getElementById("speedy");
-const posx=document.getElementById("posx");
-const posy=document.getElementById("posy");
-function drawCircle(){
-ctx.beginPath()
-ctx.arc(circlePosX,circlePosY,mass,Math.PI*2,false);
-ctx.stroke();
-ctx.closePath()
+const showMass=document.getElementById("show-mass");
+const showSpeedX=document.getElementById("show-speedx");
+const showSpeedY=document.getElementById("show-speedy");
+const showPosX=document.getElementById("show-posx");
+const showPosY=document.getElementById("show-posy");
+const showAccelX=document.getElementById("show-accelx");
+const showAccelY=document.getElementById("show-accely");
+const showFriction=document.getElementById("show-friction");
+let circlePosX = width / 2;
+let circlePosY = height / 2;
+let circleVecX = 1;
+let circleVecY = 0.5;
+let mass = 20;
+
+let friction=0;
+let accelX = 0.7;
+let accelY = 0.5; //gravity duh
+
+const massInput = document.getElementById("mass"); //m
+const accelxInput=document.getElementById("accelx"); //ax
+const accelyInput=document.getElementById("accely") //ay
+const speedx = document.getElementById("speedx");  //v.x
+const speedy = document.getElementById("speedy");  //v.y
+const posx = document.getElementById("posx");  //s.x
+const posy = document.getElementById("posy");  //s.y
+const frictionInput=document.getElementById("friction"); //friction
+
+function drawCircle() {
+  ctx.beginPath();
+  ctx.arc(circlePosX, circlePosY, mass, 0, Math.PI * 2, false);
+  ctx.stroke();
+  ctx.closePath();
 }
 
-function setInput(setter,input,defaultValue){
-  input.addEventListener("input",()=>{
-   setter(parseFloat(input.value) || defaultValue);
-  })
+function setInput(setter, input, defaultValue) {
+  input.addEventListener("input", () => {
+    setter(parseFloat(input.value) || defaultValue);
+  });
 }
 
-function setMass(mass,input,defaultValue){
-  setInput(mass,input);
+function setMass(setter, input, defaultValue) {
+  setInput(setter, input, defaultValue);
 }
-function setSpeedX(speedx,input,defaultValue){
-  setInput(speedx,input);
+function setSpeedX(setter, input, defaultValue) {
+  setInput(setter, input, defaultValue);
 }
-function setSpeedY(speedy,input,defaultValue){
-  setInput(speedy,input);
+function setSpeedY(setter, input, defaultValue) {
+  setInput(setter, input, defaultValue);
 }
-function setPosX(posx,input,defaultValue){
-  setInput(posx,input);
+function setAccelX(setter,input,defaultValue){
+    setInput(setter,input,defaultValue);
 }
-function setPosY(posy,input,defaultValue){
-  setInput(posy,input)
+function setAccelY(setter,input,defaultValue){
+    setInput(setter,input,defaultValue);
 }
-function bounceOffX(){
-  if(circlePosX+mass/3>width){
-    //circlePosX-=10-mass/2;
-    circleVecX*=-1;
+function setPosX(setter, input, defaultValue) {
+  setInput(setter, input, defaultValue);
+}
+function setPosY(setter, input, defaultValue) {
+  setInput(setter, input, defaultValue);
+}
+function setFriction(setter,input,defaultValue){
+  setInput(setter,input,defaultValue);
+}
+
+function bounceOffX() {
+  if (circlePosX + mass / 3 > width || circlePosX - mass / 3 < 0) {
+    circleVecX *= -1;
   }
-  if(circlePosX-mass/3<0){
-     //circlePosX+=10+mass/2;
-     circleVecX*=-1;
-   }
 }
 
-function bounceOffY(){
-  if(circlePosY+mass/3>height){
-    //circlePosY-=10-mass/2;
-    circleVecY*=-1;
+function bounceOffY() {
+  if (circlePosY + mass / 3 > height || circlePosY - mass / 3 < 0) {
+    circleVecY *= -1;
   }
-  if(circlePosY-mass/3<0){
-     //circlePosY+=10+mass/2;
-     circleVecY*=-1;
-   }
 }
 
-function move(){
-  circlePosX+=circleVecX;
-  circlePosY+=circleVecY;
+function applyFriction() {
+  circleVecX *= (1 - friction);
+  circleVecY *= (1 - friction);
 }
 
-function animate(){
-   ctx.clearRect(0,0,width,height);
-   drawCircle();
-   move()
-   bounceOffX();
-   bounceOffY();
-   requestAnimationFrame(animate);
+function move(dt) {
+  // v = u + at
+  circleVecX += accelX * dt;
+  circleVecY += accelY * dt;
+
+  // s = ut + at^2/2
+  circlePosX += circleVecX * dt + 0.5 * accelX * dt * dt;
+  circlePosY += circleVecY * dt + 0.5 * accelY * dt * dt;
+}
+//get current Time
+let lastTime = performance.now();
+
+function animate(currentTime) {
+  //get dt
+  const deltaTime = (currentTime - lastTime) / 1000;
+  lastTime = currentTime;
+
+  ctx.clearRect(0, 0, width, height);
+  drawCircle();
+  applyFriction();
+  move(deltaTime);
+  bounceOffX();
+  bounceOffY();
+  show();
+  requestAnimationFrame(animate);
 }
 
-function init(){
-  setMass(ret=>mass=ret,massInput,20);
-  setSpeedX(ret=>circleVecX=ret,speedx,1);
-  setSpeedY(ret=>circleVecY=ret,speedy,0.85);
-  setPosX(ret=>circlePosX=ret,posx,width/2);
-  setPosY(ret=>circlePosY=ret,posy,height/2);
+function init() {
+  setMass(ret => mass = ret, massInput, 20);
+  setSpeedX(ret => circleVecX = ret, speedx, 1);
+  setSpeedY(ret => circleVecY = ret, speedy, 0.85);
+  setAccelX(ret=>accelX=ret,accelxInput,0.75);
+  setAccelY(ret=>accelY=ret,accelyInput,0.5)  
+  setPosX(ret => circlePosX = ret, posx, width / 2);
+  setPosY(ret => circlePosY = ret, posy, height / 2);
+  setFriction(ret=>friction=ret, frictionInput, 0);
 }
 
-function run(){
+function show(){
+    showMass.innerText=`mass:${mass}`;
+    showPosX.innerText=`posx:${circlePosX}`;
+    showPosY.innerText=`posy:${circlePosY};`;
+    showSpeedX.innerText=`speedx:${circleVecX}`;
+    showSpeedY.innerText=`speedy:${circleVecY}`;
+    showAccelX.innerText=`accelx:${accelX}`;
+    showAccelY.innerText=`accely:${accelY}`;
+    showFriction.innerText=`friction:${friction}`
+}
+function run() {
   init();
-  animate();
+  animate(performance.now());
 }
 
 run();
