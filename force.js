@@ -71,15 +71,15 @@ function setFriction(setter,input,defaultValue){
 
 function bounceOffX() {
   if (circlePosX + mass / 3 > width || circlePosX - mass / 3 < 0) {
-    circleVecX *= -1;
-    accelX*=-1
+    circleVecX *= -0.95;
+    accelX*=-0.95
   }
 }
 
 function bounceOffY() {
   if (circlePosY + mass / 3 > height || circlePosY - mass / 3 < 0) {
-    circleVecY *= -1;
-    accelY8=-1; 
+    circleVecY *= -0.95;
+    accelY*=-0.95; 
   }
 }
 
