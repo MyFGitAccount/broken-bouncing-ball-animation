@@ -58,8 +58,17 @@ class Ball{
      this.PosX+=this.SpeedX;
      this.PosY+=this.SpeedY;
    }
-}
+}       
 
+float FloatPow(float base,float exp){
+  float b=base;
+    while(exp!=0){
+      base*=b;
+      exp--;
+    }
+    return base;
+}
+                                   
 float circleDistanceX(Ball ball,Paddle paddle){
    float circldisx=ball.PosX-paddle.PosX-paddle.Width/2;
    return Math.abs(circldisx);
@@ -79,12 +88,23 @@ boolean hitPaddleX(Ball ball,Paddle paddle){
    return true;
 }
 
+float cornerDistance(Ball ball,Paddle paddle){
+  return FloatPow(circleDistanceX(ball,paddle)-paddle.Width,2)+FloatPow(circleDistanceY(ball,paddle)-paddle.Width/2,2);
+}
+
 boolean hitPaddleY(Ball ball,Paddle paddle){
 
    if(circleDistanceY(ball,paddle)>(paddle.Height/2+ball.R/2)){
      return false;
    }
    return true;
+}
+
+boolean HitCorner(Ball ball,Paddle paddle){
+   if(cornerDistance(ball,paddle)<=FloatPow(ball.R,2)){
+     return true;
+   }
+   return false;
 }
 
 
@@ -99,9 +119,9 @@ void draw(){
     PaddleLeft.Draw();
     PaddleRight.Draw();
     if(hitPaddleX(ball,PaddleLeft)){
-      ball.Bound();
+      ball.SpeedX*=-1;
     }
     if(hitPaddleY(ball,PaddleLeft)){
-      ball.Bound();   
+      ball.SpeedY*=-1;
     }
 }
